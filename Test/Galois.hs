@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Test.Galois where
 
 import Galois
@@ -21,3 +23,6 @@ prop_distrib a b c = a * (b+c) == (a*b) + (a*c)
 
 prop_unique :: GF -> GF -> GF -> Bool
 prop_unique a b c = a == 0 || b == 0 || c == 0 || a == b || a == c || b == c || (a*b /= a*c && b*c /= a*c && b*c /= b*a)
+
+return []
+runTests = $quickCheckAll
