@@ -10,6 +10,8 @@ import SBox
  
 type State = [GWord]
 
+testState = [(1,1,1,1),(2,2,2,2),(3,3,3,3),(4,4,4,4)] :: State
+
 round :: State -> Key -> State
 round s k =  addRoundKey k $ mixColumns $ shiftRow $ byteSub s
 
@@ -28,9 +30,15 @@ byteSub s = map (gwmap sbox) s
 invSubBytes s = map (gwmap invsbox) s
 
 shiftRow :: State -> State
-shiftRow = undefined
+shiftRow s = s'
+  where
+    [as,bs,cs,ds] = rowMajor s
+    s' = columnMajor [as, rotate 1 bs, rotate 2 cs, rotate 3 ds]
 
-invShiftRows = undefined
+invShiftRows s = s'
+    where
+    [as,bs,cs,ds] = rowMajor s
+    s' = columnMajor [as, rotate (-1) bs, rotate (-2) cs, rotate (-3) ds]
 
 mixColumns :: State -> State
 mixColumns  = map (gwmult ax)
@@ -41,3 +49,26 @@ invMixColumns = map (gwmult ax)
 
 addRoundKey :: Key -> State -> State
 addRoundKey = zipWith gwxor
+
+rowMajor :: State -> [[GF]]
+rowMajor xs = aux xs []
+  where
+    aux :: [GWord] -> [[GF]] -> [[GF]]
+    aux [] ys = map reverse ys
+    aux ((a,b,c,d):xs) [] = aux xs [[a],[b],[c],[d]]
+    aux ((a,b,c,d):xs) [as,bs,cs,ds] = aux xs [a:as,b:bs,c:cs,d:ds]
+
+rotate :: Int -> [a] -> [a]
+rotate n xs | n < 0 = rotate (l + n) xs
+  where 
+    l = length xs
+rotate n xs = b ++ a
+ where
+   (a,b) = splitAt n xs
+
+columnMajor :: [[GF]] -> State
+columnMajor xs = aux xs []
+  where
+    aux [[],[],[],[]] ys = reverse ys
+    aux [a:as,b:bs,c:cs,d:ds] ys = aux [as,bs,cs,ds] ((a,b,c,d):ys)
+    aux _ _ = []  -- so we have a total function
