@@ -42,10 +42,10 @@ invShiftRows s = s'
 
 mixColumns :: State -> State
 mixColumns  = map (gwmult ax)
-  where ax = ((GF 0x03),(GF 0x01), (GF 0x01), (GF 0x02))  -- Equation (5.5)
+  where ax = ((GF 0x02),(GF 0x01), (GF 0x01), (GF 0x03))  -- Equation (5.5)
 
 invMixColumns = map (gwmult ax)
-  where  ax = ((GF 0x0b),(GF 0x0d), (GF 0x09), (GF 0x0e))  -- Equation (5.9)
+  where  ax = ((GF 0x0e),(GF 0x09), (GF 0x0d), (GF 0xb))  -- Equation (5.9)
 
 addRoundKey :: Key -> State -> State
 addRoundKey = zipWith gwxor
