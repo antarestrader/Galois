@@ -1,6 +1,7 @@
 module Round where
 
 import Galois
+import GWord
 import Key
 import SBox
 
@@ -8,9 +9,7 @@ import SBox
 -- four rows, the number of columns is denoted by Nb  and is equal to the block
 -- length divided by 32.
  
-type State = [GWord]
-
-testState = [(1,1,1,1),(2,2,2,2),(3,3,3,3),(4,4,4,4)] :: State
+type State = GMatrix
 
 round :: State -> Key -> State
 round s k =  addRoundKey k $ mixColumns $ shiftRow $ byteSub s
@@ -42,10 +41,10 @@ invShiftRows s = s'
 
 mixColumns :: State -> State
 mixColumns  = map (gwmult ax)
-  where ax = ((GF 0x02),(GF 0x01), (GF 0x01), (GF 0x03))  -- Equation (5.5)
+  where ax = (GW (0x02) (0x01) (0x01) (0x03))  -- Equation (5.5)
 
 invMixColumns = map (gwmult ax)
-  where  ax = ((GF 0x0e),(GF 0x09), (GF 0x0d), (GF 0xb))  -- Equation (5.9)
+  where  ax = (GW (0x0e) (0x09) (0x0d) (0xb))  -- Equation (5.9)
 
 addRoundKey :: Key -> State -> State
 addRoundKey = zipWith gwxor
@@ -55,8 +54,8 @@ rowMajor xs = aux xs []
   where
     aux :: [GWord] -> [[GF]] -> [[GF]]
     aux [] ys = map reverse ys
-    aux ((a,b,c,d):xs) [] = aux xs [[a],[b],[c],[d]]
-    aux ((a,b,c,d):xs) [as,bs,cs,ds] = aux xs [a:as,b:bs,c:cs,d:ds]
+    aux ((GW a b c d):xs) [] = aux xs [[a],[b],[c],[d]]
+    aux ((GW a b c d):xs) [as,bs,cs,ds] = aux xs [a:as,b:bs,c:cs,d:ds]
 
 rotate :: Int -> [a] -> [a]
 rotate n xs | n < 0 = rotate (l + n) xs
@@ -70,5 +69,5 @@ columnMajor :: [[GF]] -> State
 columnMajor xs = aux xs []
   where
     aux [[],[],[],[]] ys = reverse ys
-    aux [a:as,b:bs,c:cs,d:ds] ys = aux [as,bs,cs,ds] ((a,b,c,d):ys)
+    aux [a:as,b:bs,c:cs,d:ds] ys = aux [as,bs,cs,ds] ((GW a b c d):ys)
     aux _ _ = []  -- so we have a total function
