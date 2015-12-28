@@ -4,6 +4,7 @@ module Test.Galois where
 
 import Galois
 import Test.QuickCheck
+import Test.QuickCheck.All
 
 instance Arbitrary GF where
   arbitrary = do
